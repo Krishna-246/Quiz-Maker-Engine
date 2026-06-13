@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Maker Engine</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 700px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #0072ff;
+    }
+    input, textarea, button {
+      margin: 8px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background: #0072ff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #005bb5;
+    }
+    .question {
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    .option {
+      margin: 5px 0;
+    }
+    .correct {
+      color: green;
+      font-weight: bold;
+    }
+    .wrong {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Quiz Maker Engine</h1>
+
+    <!-- Quiz Creation -->
+    <div id="createSection">
+      <input type="text" id="questionInput" placeholder="Enter question">
+      <input type="text" id="option1" placeholder="Option 1">
+      <input type="text" id="option2" placeholder="Option 2">
+      <input type="text" id="option3" placeholder="Option 3">
+      <input type="text" id="option4" placeholder="Option 4">
+      <input type="number" id="correctOption" placeholder="Correct option number (1-4)">
+      <button onclick="addQuestion()">Add Question</button>
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <!-- Quiz Playing -->
+    <div id="quizSection" style="display:none;">
+      <div id="quiz"></div>
+      <button onclick="submitQuiz()">Submit Quiz</button>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <script>
+    let questions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+    function addQuestion() {
+      const question = document.getElementById("questionInput").value;
+      const options = [
+        document.getElementById("option1").value,
+        document.getElementById("option2").value,
+        document.getElementById("option3").value,
+        document.getElementById("option4").value
+      ];
+      const correct = parseInt(document.getElementById("correctOption").value);
+
+      if (!question || options.some(o => !o) || isNaN(correct) || correct < 1 || correct > 4) {
+        alert("Fill all fields correctly!");
+        return;
+      }
+
+      questions.push({ question, options, correct });
+      localStorage.setItem("quizQuestions", JSON.stringify(questions));
+
+      document.getElementById("questionInput").value = "";
+      document.getElementById("option1").value = "";
+      document.getElementById("option2").value = "";
+      document.getElementById("option3").value = "";
+      document.getElementById("option4").value = "";
+      document.getElementById("correctOption").value = "";
+
+      alert("Question added!");
+    }
+
+    function startQuiz() {
+      if (questions.length === 0) {
+        alert("No questions added yet!");
+        return;
+      }
+      document.getElementById("createSection").style.display = "none";
+      document.getElementById("quizSection").style.display = "block";
+
+      const quizDiv = document.getElementById("quiz");
+      quizDiv.innerHTML = "";
+      questions.forEach((q, index) => {
+        let html = `<div class="question"><b>${index+1}. ${q.question}</b><br>`;
+        q.options.forEach((opt, i) => {
+          html += `<div class="option"><input type="radio" name="q${index}" value="${i+1}"> ${opt}</div>`;
+        });
+        html += `</div>`;
+        quizDiv.innerHTML += html;
+      });
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        if (selected && parseInt(selected.value) === q.correct) {
+          score++;
+        }
+      });
+      document.getElementById("result").innerHTML = `You scored ${score} out of ${questions.length}`;
+    }
+  </script>
+</body>
+</html>
